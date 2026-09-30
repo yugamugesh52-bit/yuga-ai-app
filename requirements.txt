@@ -1,1 +1,2 @@
-npx skills add google-gemini/gemini-skills --skill gemini-api-dev
+streamlit
+google-generativeai
