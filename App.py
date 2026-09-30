@@ -4,23 +4,17 @@ import google.generativeai as genai
 st.set_page_config(page_title="Yuga AI", page_icon="🤖")
 st.title("🤖 யுகா (Yuga) - Personal Assistant")
 
-# Sidebar la API Key vanga
+# Sidebar-ல் API Key வாங்குதல்
 api_key = st.sidebar.text_input("Enter Gemini API Key", type="password")
 
 if api_key:
     try:
         genai.configure(api_key=api_key)
         
-        system_instruction = (
-            "உன் பெயர் யுகா (Yuga). நீ ஒரு அதிபுத்திசாலி மற்றும் நம்பகமான தனிப்பட்ட AI உதவியாளர். "
-            "பயனர் கேட்கும் கேள்விகளுக்குத் தெளிவாகவும் சுருக்கமாகவும் தமிழ் மற்றும் ஆங்கிலத்தில் பதிலளிக்க வேண்டும். "
-            "எப்போதும் மரியாதையுடனும் உதவியாகவும் உரையாட வேண்டும்."
-        )
-        
-        # புதிய ஆதரிக்கப்படும் gemini-3.8-flash மாடல்
-        model = genai.GenerativeModel("gemini-3.8-flash", system_instruction=system_instruction)
+        # நேரடி மற்றும் நிலையான மாடல்
+        model = genai.GenerativeModel("gemini-3.8-flash")
 
-        # Chat history maintain panna
+        # Chat history maintain பண்ணுதல்
         if "messages" not in st.session_state:
             st.session_state.messages = []
 
@@ -35,9 +29,18 @@ if api_key:
                 st.markdown(prompt)
 
             with st.chat_message("assistant"):
-                response = model.generate_content(prompt)
-                st.markdown(response.text)
-                st.session_state.messages.append({"role": "assistant", "content": response.text})
+                prompt_full = (
+                    "உன் பெயர் யுகா (Yuga). நீ ஒரு அதிபுத்திசாலி AI உதவியாளர். "
+                    "பயனர் கேட்கும் கேள்விக்கு உடனே சுருக்கமாகவும் தெளிவாகவும் பதிலளி:\n\n"
+                    f"{prompt}"
+                )
+                
+                # வேகமாகப் பதிலை வரவழைக்க ஸ்ட்ரீமிங் முறை
+                response = model.generate_content(prompt_full, stream=True)
+                full_text = st.write_stream(response)
+                
+                st.session_state.messages.append({"role": "assistant", "content": full_text})
+                
     except Exception as e:
         st.error(f"பிழை ஏற்பட்டது: {e}")
 else:
