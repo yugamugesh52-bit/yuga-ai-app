@@ -10,8 +10,6 @@ api_key = st.sidebar.text_input("Enter Gemini API Key", type="password")
 if api_key:
     try:
         genai.configure(api_key=api_key)
-        
-        # நேரடி மற்றும் நிலையான மாடல்
         model = genai.GenerativeModel("gemini-3.8-flash")
 
         # Chat history maintain பண்ணுதல்
@@ -31,15 +29,16 @@ if api_key:
             with st.chat_message("assistant"):
                 prompt_full = (
                     "உன் பெயர் யுகா (Yuga). நீ ஒரு அதிபுத்திசாலி AI உதவியாளர். "
-                    "பயனர் கேட்கும் கேள்விக்கு உடனே சுருக்கமாகவும் தெளிவாகவும் பதிலளி:\n\n"
+                    "பயனர் கேட்கும் கேள்விக்கு நேரடியாக, தெளிவாகவும் தமிழிலும் பதிலளி:\n\n"
                     f"{prompt}"
                 )
                 
-                # வேகமாகப் பதிலை வரவழைக்க ஸ்ட்ரீமிங் முறை
-                response = model.generate_content(prompt_full, stream=True)
-                full_text = st.write_stream(response)
+                # நேரடி பதில் வரவழைத்தல்
+                response = model.generate_content(prompt_full)
+                reply_text = response.text
                 
-                st.session_state.messages.append({"role": "assistant", "content": full_text})
+                st.markdown(reply_text)
+                st.session_state.messages.append({"role": "assistant", "content": reply_text})
                 
     except Exception as e:
         st.error(f"பிழை ஏற்பட்டது: {e}")
